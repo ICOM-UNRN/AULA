@@ -117,7 +117,6 @@ export default function RootLayout({
         <NextUIProviderContext>
           <body
             className={`${fabrikat.variable} font-fabrikat antialiased`}
-            //className={`${fabrikat.variable} bg-[url('../public/background.png')] bg-cover bg-center font-fabrikat antialiased`}
             style={{
               minHeight: '100vh',
               display: 'flex',
