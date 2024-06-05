@@ -83,7 +83,7 @@ const fabrikat = localFont({
 });
 
 export const metadata: Metadata = {
-  //metadataBase: new URL(''),
+  metadataBase: new URL('https://aula-two.vercel.app/'),
   title: {
     template: '%s | AULA',
     default: 'AULA',
@@ -92,13 +92,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'AULA',
     description: 'Proyecto AULA de la materia Ingeniería de Software I UNRN',
-    //url: '',
+    url: 'https://aula-two.vercel.app/',
     siteName: 'AULA',
     images: [
       {
         url: './opengraph-image.png',
-        width: 1366,
-        height: 768,
+        width: 800,
+        height: 600,
       },
     ],
     locale: 'es_AR',
