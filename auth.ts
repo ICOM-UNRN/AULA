@@ -6,13 +6,14 @@ import { sql } from '@vercel/postgres';
 import type { Admin } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 
-async function getUser(email: string): Promise<Admin | undefined> {
+async function getAdmin(email: string): Promise<Admin | undefined> {
   try {
-    const user = await sql<Admin>`SELECT * FROM users WHERE email=${email}`;
-    return user.rows[0];
+    const admin =
+      await sql<Admin>`SELECT id, name, email, password FROM administrators WHERE email=${email}`;
+    return admin.rows[0];
   } catch (error) {
-    console.error('Error al ingresar:', error);
-    throw new Error('Error al ingresar.');
+    console.error('Failed to fetch admin:', error);
+    throw new Error('Failed to fetch admin.');
   }
 }
 
@@ -25,7 +26,7 @@ export const { auth, signIn, signOut } = NextAuth({
         .safeParse(credentials);
       if (parsedCredentials.success) {
         const { email, password } = parsedCredentials.data;
-        const user = await getUser(email);
+        const user = await getAdmin(email);
         if (!user) return null;
         const passwordsMatch = await bcrypt.compare(password, user.password);
 
