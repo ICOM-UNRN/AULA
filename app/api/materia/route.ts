@@ -105,7 +105,7 @@ export async function GET(request: Request) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     } else {
-      return NextResponse.json({ error: "Unknown error occurred" }, { status: 500 });
+      return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
     }
   }
 }
