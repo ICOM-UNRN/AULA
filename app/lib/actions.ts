@@ -2,10 +2,19 @@
 'use server';
 
 import { z } from 'zod';
-import { sql } from '@vercel/postgres';
+import { AuthError } from 'next-auth';
 import { revalidatePath } from 'next/cache';
+import { signIn } from '@/auth';
+import { sql } from '@vercel/postgres';
 
-// Define schemas for each entity
+export type State = {
+  errors?: {
+    [key: string]: string[];
+  };
+  message?: string | null;
+};
+
+// Esquemas de validación
 const AsignacionSchema = z.object({
   id_aula: z.string(),
   id_materia: z.string(),
@@ -55,7 +64,38 @@ const ProfesorSchema = z.object({
   periodo_a_cargo: z.string(),
 });
 
-// Helper function to create records
+const ProfesorPorMateriaSchema = z.object({
+  id_profesor: z.string(),
+  id_materia: z.string(),
+});
+
+const RecursoSchema = z.object({
+  id: z.string(),
+  tipo: z.string(),
+  descripcion: z.string(),
+});
+
+const RecursoPorAulaSchema = z.object({
+  id_recurso: z.string(),
+  id_aula: z.string(),
+});
+
+async function authenticate(prevState: string | undefined, formData: FormData) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Credenciales invalidas';
+        default:
+          return 'Algo salió mal :(';
+      }
+    }
+    throw error;
+  }
+}
+
 async function createRecord(schema: z.ZodObject<any>, tableName: string, formData: FormData): Promise<string> {
   return new Promise(async (resolve, reject) => {
     const validatedFields = schema.omit({ id: true }).safeParse(Object.fromEntries(formData.entries()));
@@ -70,12 +110,13 @@ async function createRecord(schema: z.ZodObject<any>, tableName: string, formDat
 
     const fields = validatedFields.data;
     const columns = Object.keys(fields).join(', ');
-    const values = Object.values(fields).map(value => `'${value}'`).join(', ');
+    const values = Object.values(fields);
+    const placeholders = values.map((_, index) => `$${index + 1}`).join(', ');
 
-    const query = `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
+    const query = `INSERT INTO ${tableName} (${columns}) VALUES (${placeholders})`;
 
     try {
-      await sql.query(query);
+      await sql.query(query, values);
       revalidatePath(`/dashboard/${tableName}`);
       resolve(`${tableName.charAt(0).toUpperCase() + tableName.slice(1)} creado con éxito`);
     } catch (error) {
@@ -85,27 +126,28 @@ async function createRecord(schema: z.ZodObject<any>, tableName: string, formDat
   });
 }
 
-// Helper function to update records
 async function updateRecord(schema: z.ZodObject<any>, tableName: string, id: string, formData: FormData) {
   return new Promise(async (resolve, reject) => {
     const validatedFields = schema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
-      return {
+      reject({
         errors: validatedFields.error.flatten().fieldErrors,
         message: `Faltan datos. Error al actualizar ${tableName}.`,
-      };
+      });
+      return;
     }
 
     const fields = validatedFields.data;
     const setValues = Object.entries(fields)
-      .map(([key, value]) => `${key} = '${value}'`)
+      .map(([key, value], index) => `${key} = $${index + 1}`)
       .join(', ');
 
-    const query = `UPDATE ${tableName} SET ${setValues} WHERE id = '${id}'`;
+    const values = Object.values(fields);
+    const query = `UPDATE ${tableName} SET ${setValues} WHERE id = $${values.length + 1}`;
 
     try {
-      await sql.query(query);
+      await sql.query(query, [...values, id]);
       resolve(`${tableName.charAt(0).toUpperCase() + tableName.slice(1)} actualizado con éxito`);
     } catch (error) {
       reject({ message: `Database Error: Failed to Update ${tableName.charAt(0).toUpperCase() + tableName.slice(1)}.` });
@@ -115,12 +157,9 @@ async function updateRecord(schema: z.ZodObject<any>, tableName: string, id: str
   });
 }
 
-// Helper function to delete records
 async function deleteRecord(tableName: string, id: string) {
-  const query = `DELETE FROM ${tableName} WHERE id = '${id}'`;
-
   try {
-    await sql.query(query);
+    await sql.query(`DELETE FROM ${tableName} WHERE id = $1`, [id]);
     revalidatePath(`/dashboard/${tableName}`);
     return { message: `${tableName.charAt(0).toUpperCase() + tableName.slice(1)} eliminado.` };
   } catch (error) {
@@ -204,4 +243,43 @@ export async function updateProfesor(id: string, formData: FormData) {
 
 export async function deleteProfesor(id: string) {
   return deleteRecord('profesor', id);
+}
+
+// ProfesorPorMateria CRUD operations
+export async function createProfesorPorMateria(formData: FormData): Promise<string> {
+  return createRecord(ProfesorPorMateriaSchema, 'profesorpormateria', formData);
+}
+
+export async function updateProfesorPorMateria(id: string, formData: FormData) {
+  return updateRecord(ProfesorPorMateriaSchema, 'profesorpormateria', id, formData);
+}
+
+export async function deleteProfesorPorMateria(id: string) {
+  return deleteRecord('profesorpormateria', id);
+}
+
+// Recurso CRUD operations
+export async function createRecurso(formData: FormData): Promise<string> {
+  return createRecord(RecursoSchema, 'recurso', formData);
+}
+
+export async function updateRecurso(id: string, formData: FormData) {
+  return updateRecord(RecursoSchema, 'recurso', id, formData);
+}
+
+export async function deleteRecurso(id: string) {
+  return deleteRecord('recurso', id);
+}
+
+// RecursoPorAula CRUD operations
+export async function createRecursoPorAula(formData: FormData): Promise<string> {
+  return createRecord(RecursoPorAulaSchema, 'recursoporaula', formData);
+}
+
+export async function updateRecursoPorAula(id: string, formData: FormData) {
+  return updateRecord(RecursoPorAulaSchema, 'recursoporaula', id, formData);
+}
+
+export async function deleteRecursoPorAula(id: string) {
+  return deleteRecord('recursoporaula', id);
 }
