@@ -23,7 +23,8 @@ export async function GET(request: Request) {
             id,
             nombre,
             descripcion,
-            id_aula
+            comienzo,
+            fin
           FROM evento
         ) AS subquery
         ORDER BY id DESC
@@ -38,7 +39,8 @@ export async function GET(request: Request) {
             id,
             nombre,
             descripcion,
-            id_aula
+            comienzo,
+            fin
           FROM evento
         ) AS subquery
         WHERE
@@ -57,7 +59,8 @@ export async function GET(request: Request) {
             id,
             nombre,
             descripcion,
-            id_aula
+            comienzo,
+            fin
           FROM evento
         ) AS subquery
         WHERE
@@ -73,7 +76,8 @@ export async function GET(request: Request) {
           id,
           nombre,
           descripcion,
-          id_aula
+          comienzo,
+          fin
         FROM evento
         ORDER BY id DESC
       `;
