@@ -6,7 +6,8 @@ import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@nextui-org/react';
 import { authenticate } from '@/app/lib/actions';
 import { InputComponent as Input } from '@/app/components/login/input';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function LoginForm() {
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
@@ -32,11 +33,17 @@ export default function LoginForm() {
       setPasswordError(false);
     }
   };
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (pathname === '/dashboard') router.push('/login');
+  }, []);
 
   return (
     <form
       action={dispatch}
-      className=" bg-lightPaper dark:bg-darkPaper w-96 space-y-3 rounded-md text-foreground"
+      className=" w-96 space-y-3 rounded-md bg-lightPaper text-foreground dark:bg-darkPaper"
       style={{
         boxShadow:
           'rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px',
