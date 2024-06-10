@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 'use server';
 
 import { AuthError } from 'next-auth';
@@ -30,14 +29,14 @@ export async function authenticate(
 // Definición del estado de la aplicación
 export type State = {
     errors?: {
-      codigo_guarani?: string[];
-      carrera?: string[];
-      nombre?: string[];
-      anio?: string[];
-      cuatrimestre?: string[];
-      taxonomia?: string[];
-      horas_semanales?: string[];
-      comisiones?: string[];
+        codigo_guarani?: string[];
+        carrera?: string[];
+        nombre?: string[];
+        anio?: string[];
+        cuatrimestre?: string[];
+        taxonomia?: string[];
+        horas_semanales?: string[];
+        comisiones?: string[];
     };
     message?: string | null;
 };
@@ -88,7 +87,7 @@ export async function createMateria(formData: FormData): Promise<string> {
             return Promise.reject({ message: 'La materia ya existe.' });
         } else {
             revalidatePath('/dashboard/materias');
-            return Promise.resolve('Materia creada con éxito');
+            return 'Materia creada con éxito';
         }
     } catch (error) {
         revalidatePath('/dashboard/materias');
@@ -127,7 +126,7 @@ export async function updateMateria(id: string, formData: FormData): Promise<str
             WHERE id = ${id}
         `;
         revalidatePath(`/dashboard/materias/${id}`);
-        return Promise.resolve('Materia actualizada con éxito');
+        return 'Materia actualizada con éxito';
     } catch (error) {
         return Promise.reject({ message: 'Error en la base de datos: No se pudo actualizar la materia.' });
     }
@@ -144,94 +143,174 @@ export async function deleteMateria(id: string): Promise<{ message: string }> {
     }
 }
 
-
-
 // Esquema de validación para la creación de un aula
 const AulaFormSchema = z.object({
     id_aula: z.string().optional(),
-    nombre: z.string().min(1, "El nombre es requerido"),
-    id_edificio: z.number().int().positive("El ID del edificio debe ser un número entero positivo"),
+    nombre: z.string().min(1, 'El nombre es requerido'),
+    id_edificio: z.number().int().positive('El ID del edificio debe ser un número entero positivo'),
 });
 
 // Crear una aula
 const CreateAula = AulaFormSchema.omit({ id_aula: true });
 
 export async function createAula(formData: FormData): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-        const validatedFields = CreateAula.safeParse(Object.fromEntries(formData.entries()));
+    const validatedFields = CreateAula.safeParse(Object.fromEntries(formData.entries()));
 
-        if (!validatedFields.success) {
-            reject({
-                errors: validatedFields.error.flatten().fieldErrors,
-                message: 'Faltan datos. Error al crear aula.',
-            });
-            return;
-        }
+    if (!validatedFields.success) {
+        return Promise.reject({
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Faltan datos. Error al crear aula.',
+        });
+    }
 
-        const { id_edificio, nombre } = validatedFields.data;
+    const { id_edificio, nombre } = validatedFields.data;
 
-        try {
-            const result = await sql`
-                SELECT public.insert_aula(${id_edificio}, ${nombre}) as result;
-            `;
+    try {
+        const result = await sql`
+            SELECT public.insert_aula(${id_edificio}, ${nombre}) as result;
+        `;
 
-            if (result.rows[0].result === 1) {
-                reject({ message: 'El aula ya existe.' });
-            } else if (result.rows[0].result === 2) {
-                reject({ message: 'El edificio no existe.' });
-            } else {
-                revalidatePath('/dashboard/aulas');
-                resolve('Aula creada con éxito');
-            }
-        } catch (error) {
+        if (result.rows[0].result === 1) {
+            return Promise.reject({ message: 'El aula ya existe.' });
+        } else if (result.rows[0].result === 2) {
+            return Promise.reject({ message: 'El edificio no existe.' });
+        } else {
             revalidatePath('/dashboard/aulas');
-            reject({ message: 'Error en la base de datos: No se pudo crear el aula.' });
+            return 'Aula creada con éxito';
         }
-    });
+    } catch (error) {
+        revalidatePath('/dashboard/aulas');
+        return Promise.reject({ message: 'Error en la base de datos: No se pudo crear el aula.' });
+    }
 }
 
 // Actualizar un aula
 export async function updateAula(id_aula: string, formData: FormData): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-        const validatedFields = AulaFormSchema.safeParse(Object.fromEntries(formData.entries()));
+    const validatedFields = AulaFormSchema.safeParse(Object.fromEntries(formData.entries()));
 
-        if (!validatedFields.success) {
-            reject({
-                errors: validatedFields.error.flatten().fieldErrors,
-                message: 'Faltan datos. Error al actualizar aula.',
-            });
-            return;
-        }
+    if (!validatedFields.success) {
+        return Promise.reject({
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Faltan datos. Error al actualizar aula.',
+        });
+    }
 
-        const { id_edificio, nombre } = validatedFields.data;
+    const { id_edificio, nombre } = validatedFields.data;
 
-        try {
-            await sql`
-                UPDATE aula
-                SET id_edificio = ${id_edificio}, nombre = ${nombre}
-                WHERE id_aula = ${id_aula}
-            `;
-            revalidatePath(`/dashboard/aulas/${id_aula}`);
-            resolve('Aula actualizada con éxito');
-        } catch (error) {
-            revalidatePath(`/dashboard/aulas/${id_aula}`);
-            reject({ message: 'Error en la base de datos: No se pudo actualizar el aula.' });
-        }
-    });
+    try {
+        await sql`
+            UPDATE aula
+            SET id_edificio = ${id_edificio}, nombre = ${nombre}
+            WHERE id_aula = ${id_aula}
+        `;
+        revalidatePath(`/dashboard/aulas/${id_aula}`);
+        return 'Aula actualizada con éxito';
+    } catch (error) {
+        revalidatePath(`/dashboard/aulas/${id_aula}`);
+        return Promise.reject({ message: 'Error en la base de datos: No se pudo actualizar el aula.' });
+    }
 }
 
 // Eliminar un aula
 export async function deleteAula(id_aula: string): Promise<string> {
+    try {
+        await sql`
+            DELETE FROM aula WHERE id_aula = ${id_aula}
+        `;
+        revalidatePath('/dashboard/aulas');
+        return 'Aula eliminada con éxito';
+    } catch (error) {
+        revalidatePath('/dashboard/aulas');
+        return Promise.reject({ message: 'Error en la base de datos: No se pudo eliminar el aula.' });
+    }
+}
+
+
+// Esquema de validación para la creación de un edificio
+const EdificioFormSchema = z.object({
+    id: z.string().optional(),
+    nombre: z.string().min(1, 'El nombre es requerido'),
+    direccion: z.string().min(1, 'La dirección es requerida'),
+    altura: z.number().int().positive('La altura debe ser un número entero positivo'),
+});
+
+// Crear un edificio
+const CreateEdificio = EdificioFormSchema.omit({ id: true });
+
+export async function createEdificio(formData: FormData): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+        const validatedFields = CreateEdificio.safeParse(Object.fromEntries(formData.entries()));
+
+        if (!validatedFields.success) {
+            reject({
+                errors: validatedFields.error.flatten().fieldErrors,
+                message: 'Faltan datos. Error al crear edificio.',
+            });
+            return;
+        }
+
+        const { nombre, direccion, altura } = validatedFields.data;
+
+        try {
+            const result = await sql`
+                SELECT public.insert_edificio(${nombre}, ${direccion}, ${altura}) as result;
+            `;
+
+            if (result.rows[0].result === 1) {
+                reject({ message: 'El edificio ya existe.' });
+            } else {
+                revalidatePath('/dashboard/edificios');
+                resolve('Edificio creado con éxito');
+            }
+        } catch (error) {
+            revalidatePath('/dashboard/edificios');
+            reject({ message: 'Error en la base de datos: No se pudo crear el edificio.' });
+        }
+    });
+}
+
+// Actualizar un edificio
+export async function updateEdificio(id: string, formData: FormData): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+        const validatedFields = EdificioFormSchema.safeParse(Object.fromEntries(formData.entries()));
+
+        if (!validatedFields.success) {
+            reject({
+                errors: validatedFields.error.flatten().fieldErrors,
+                message: 'Faltan datos. Error al actualizar edificio.',
+            });
+            return;
+        }
+
+        const { nombre, direccion, altura } = validatedFields.data;
+
+        try {
+            await sql`
+                UPDATE edificio
+                SET nombre = ${nombre}, direccion = ${direccion}, altura = ${altura}
+                WHERE id = ${id}
+            `;
+            revalidatePath(`/dashboard/edificios/${id}`);
+            resolve('Edificio actualizado con éxito');
+        } catch (error) {
+            revalidatePath(`/dashboard/edificios/${id}`);
+            reject({ message: 'Error en la base de datos: No se pudo actualizar el edificio.' });
+        }
+    });
+}
+
+// Eliminar un edificio
+export async function deleteEdificio(id: string): Promise<string> {
     return new Promise(async (resolve, reject) => {
         try {
             await sql`
-                DELETE FROM aula WHERE id_aula = ${id_aula}
+                DELETE FROM edificio WHERE id = ${id}
             `;
-            revalidatePath('/dashboard/aulas');
-            resolve('Aula eliminada con éxito');
+            revalidatePath('/dashboard/edificios');
+            resolve('Edificio eliminado con éxito');
         } catch (error) {
-            revalidatePath('/dashboard/aulas');
-            reject({ message: 'Error en la base de datos: No se pudo eliminar el aula.' });
+            revalidatePath('/dashboard/edificios');
+            reject({ message: 'Error en la base de datos: No se pudo eliminar el edificio.' });
         }
     });
 }
