@@ -19,7 +19,7 @@ export async function authenticate(
                 case 'CredentialsSignin':
                     return 'Credenciales invalidas';
                 default:
-                    return 'Algo salio mal :(';
+                    return 'Algo salió mal :(';
             }
         }
         throw error;
@@ -83,7 +83,7 @@ export async function createMateria(formData: FormData): Promise<string> {
             ) as result;
         `;
 
-        if (result.rows[0].result === 1) { // Aquí se accede a rows, no directamente a result
+        if (result.rows[0].result === 1) {
             return Promise.reject({ message: 'La materia ya existe.' });
         } else {
             revalidatePath('/dashboard/materias');
@@ -225,7 +225,6 @@ export async function deleteAula(id_aula: string): Promise<string> {
     }
 }
 
-
 // Esquema de validación para la creación de un edificio
 const EdificioFormSchema = z.object({
     id: z.string().optional(),
@@ -238,79 +237,71 @@ const EdificioFormSchema = z.object({
 const CreateEdificio = EdificioFormSchema.omit({ id: true });
 
 export async function createEdificio(formData: FormData): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-        const validatedFields = CreateEdificio.safeParse(Object.fromEntries(formData.entries()));
+    const validatedFields = CreateEdificio.safeParse(Object.fromEntries(formData.entries()));
 
-        if (!validatedFields.success) {
-            reject({
-                errors: validatedFields.error.flatten().fieldErrors,
-                message: 'Faltan datos. Error al crear edificio.',
-            });
-            return;
-        }
+    if (!validatedFields.success) {
+        return Promise.reject({
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Faltan datos. Error al crear edificio.',
+        });
+    }
 
-        const { nombre, direccion, altura } = validatedFields.data;
+    const { nombre, direccion, altura } = validatedFields.data;
 
-        try {
-            const result = await sql`
-                SELECT public.insert_edificio(${nombre}, ${direccion}, ${altura}) as result;
-            `;
+    try {
+        const result = await sql`
+            SELECT public.insert_edificio(${nombre}, ${direccion}, ${altura}) as result;
+        `;
 
-            if (result.rows[0].result === 1) {
-                reject({ message: 'El edificio ya existe.' });
-            } else {
-                revalidatePath('/dashboard/edificios');
-                resolve('Edificio creado con éxito');
-            }
-        } catch (error) {
+        if (result.rows[0].result === 1) {
+            return Promise.reject({ message: 'El edificio ya existe.' });
+        } else {
             revalidatePath('/dashboard/edificios');
-            reject({ message: 'Error en la base de datos: No se pudo crear el edificio.' });
+            return 'Edificio creado con éxito';
         }
-    });
+    } catch (error) {
+        revalidatePath('/dashboard/edificios');
+        return Promise.reject({ message: 'Error en la base de datos: No se pudo crear el edificio.' });
+    }
 }
 
 // Actualizar un edificio
 export async function updateEdificio(id: string, formData: FormData): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-        const validatedFields = EdificioFormSchema.safeParse(Object.fromEntries(formData.entries()));
+    const validatedFields = EdificioFormSchema.safeParse(Object.fromEntries(formData.entries()));
 
-        if (!validatedFields.success) {
-            reject({
-                errors: validatedFields.error.flatten().fieldErrors,
-                message: 'Faltan datos. Error al actualizar edificio.',
-            });
-            return;
-        }
+    if (!validatedFields.success) {
+        return Promise.reject({
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Faltan datos. Error al actualizar edificio.',
+        });
+    }
 
-        const { nombre, direccion, altura } = validatedFields.data;
+    const { nombre, direccion, altura } = validatedFields.data;
 
-        try {
-            await sql`
-                UPDATE edificio
-                SET nombre = ${nombre}, direccion = ${direccion}, altura = ${altura}
-                WHERE id = ${id}
-            `;
-            revalidatePath(`/dashboard/edificios/${id}`);
-            resolve('Edificio actualizado con éxito');
-        } catch (error) {
-            revalidatePath(`/dashboard/edificios/${id}`);
-            reject({ message: 'Error en la base de datos: No se pudo actualizar el edificio.' });
-        }
-    });
+    try {
+        await sql`
+            UPDATE edificio
+            SET nombre = ${nombre}, direccion = ${direccion}, altura = ${altura}
+            WHERE id = ${id}
+        `;
+        revalidatePath(`/dashboard/edificios/${id}`);
+        return 'Edificio actualizado con éxito';
+    } catch (error) {
+        revalidatePath(`/dashboard/edificios/${id}`);
+        return Promise.reject({ message: 'Error en la base de datos: No se pudo actualizar el edificio.' });
+    }
 }
 
 // Eliminar un edificio
 export async function deleteEdificio(id: string): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-        try {
-            await sql`
-                DELETE FROM edificio WHERE id = ${id}
-            `;
-            revalidatePath('/dashboard/edificios');
-            resolve('Edificio eliminado con éxito');
-        } catch (error) {
-            revalidatePath('/dashboard/edificios');
-            reject({ message: 'Error en la base de datos: No se pudo eliminar el edificio.' });
-        }
-    });
+    try {
+        await sql`
+            DELETE FROM edificio WHERE id = ${id}
+        `;
+        revalidatePath('/dashboard/edificios');
+        return 'Edificio eliminado con éxito';
+    } catch (error) {
+        revalidatePath('/dashboard/edificios');
+        return Promise.reject({ message: 'Error en la base de datos: No se pudo eliminar el edificio.' });
+    }
 }
