@@ -2,9 +2,10 @@
 import { Toaster } from 'sonner';
 import { Button } from '@nextui-org/react';
 import clsx from 'clsx';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Search from '../components/dashboard/search';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -70,7 +71,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               ))}
             </div>
           )}
-          {children}
+          <div className="flex w-full flex-col justify-between px-5">
+            <div>
+              {(pathname === `/dashboard/${section}` ||
+                pathname === '/dashboard') && (
+                <>
+                  <h1 className="text-bold font-xl mb-1">Filtrar {section}</h1>
+                  <div className="flex justify-between gap-2">
+                    <Search placeholder={`Buscar ${section}`} />
+                    <Button color="primary" className="text-white">
+                      Buscar
+                    </Button>
+                  </div>
+                </>
+              )}
+              <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            </div>
+            {(pathname === `/dashboard/${section}` ||
+              pathname === '/dashboard') && (
+              <Link href={`/dashboard/${section}/agregar`}>
+                <Button className="w-full">Agregar {section}</Button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </main>

@@ -43,29 +43,59 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
   const [categoryError, setCategoryError] = useState(false);
 
   const validateName = (name: string) => {
-    const re = /^.*$/i;
-    if (re.test(name)) {
+    const re = /^[A-Za-z\s]+$/;
+    if (re.test(name) && name.trim().length > 0) {
       setNameError(false);
     } else {
       setNameError(true);
     }
   };
-
   const validateLastName = (last_name: string) => {
-    const re = /^.*$/i;
-    if (re.test(last_name)) {
+    const re = /^[A-Za-z\s]+$/;
+    if (re.test(last_name) && last_name.trim().length > 0) {
       setLastNameError(false);
     } else {
       setLastNameError(true);
     }
   };
-
   const validateDni = (dni: string) => {
     const re = /^\d{7,8}$/;
     if (re.test(dni)) {
       setDniError(false);
     } else {
       setDniError(true);
+    }
+  };
+  const validatePeriod = (period: string) => {
+    const re = /^[A-Za-z\s]+$/;
+    if (re.test(period) && period.trim().length > 0) {
+      setPeriodError(false);
+    } else {
+      setPeriodError(true);
+    }
+  };
+  const validateCondition = (condition: string) => {
+    const re = /^[A-Za-z\s]+$/;
+    if (re.test(condition) && condition.trim().length > 0) {
+      setConditionError(false);
+    } else {
+      setConditionError(true);
+    }
+  };
+  const validateCategory = (category: string) => {
+    const re = /^[A-Za-z\s]+$/;
+    if (re.test(category) && category.trim().length > 0) {
+      setCategoryError(false);
+    } else {
+      setCategoryError(true);
+    }
+  };
+  const validateDedication = (dedication: string) => {
+    const re = /^[A-Za-z\s]+$/;
+    if (re.test(dedication) && dedication.trim().length > 0) {
+      setDedicationError(false);
+    } else {
+      setDedicationError(true);
     }
   };
 
@@ -209,6 +239,9 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             value={period}
             onValueChange={(e: string) => {
               setPeriod(e);
+              if (trySubmit) {
+                validatePeriod(e);
+              }
             }}
             placeholder="Ingresar periodo"
             errorMessage="Ingresa un periodo valido"
@@ -231,6 +264,9 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             value={condition}
             onValueChange={(e: string) => {
               setCondition(e);
+              if (trySubmit) {
+                validateCondition(e);
+              }
             }}
             placeholder="Ingresar condicion"
             errorMessage="Ingresa una condición valida"
@@ -251,6 +287,9 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             value={category}
             onValueChange={(e: string) => {
               setCategory(e);
+              if (trySubmit) {
+                validateCategory(e);
+              }
             }}
             placeholder="Ingresar categoria"
             errorMessage="Ingresa una categoria valida"
@@ -271,6 +310,9 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             value={dedication}
             onValueChange={(e: string) => {
               setDedication(e);
+              if (trySubmit) {
+                validateDedication(e);
+              }
             }}
             placeholder="Ingresar dedicación"
             errorMessage="Ingresa una dedicación valida"
@@ -295,6 +337,10 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
               validateName(name);
               validateLastName(lastName);
               validateDni(dni);
+              validatePeriod(period);
+              validateCondition(condition);
+              validateCategory(category);
+              validateDedication(dedication);
             }}
             isDisabled={loading}
             endContent={

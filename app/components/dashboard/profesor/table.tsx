@@ -15,7 +15,7 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 import { UserIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { ProfesorType } from '@/app/lib/definitions';
+import { Profesor } from '@/app/lib/definitions';
 import { DeleteProfesorButton } from './delete-button';
 import { useState } from 'react';
 
@@ -26,7 +26,6 @@ const ProfesorsTable = ({
     query?: string;
     page?: string;
   };
-  section: string;
 }) => {
   const query = searchParams?.query;
   const currentPage = Number(searchParams?.page) || 1;
@@ -47,12 +46,8 @@ const ProfesorsTable = ({
     { key: 'condicion', label: 'Condicion' },
     { key: 'categoria', label: 'Categoria' },
     {
-      key: 'see',
-      label: 'Ver',
-    },
-    {
-      key: 'delete',
-      label: 'Borrar',
+      key: 'actions',
+      label: 'Acciones',
     },
   ];
 
@@ -106,13 +101,13 @@ const ProfesorsTable = ({
         aria-label="Contenido tabla usuarios"
         emptyContent="No hay usuarios en esta página"
       >
-        {rows.map((profesor: ProfesorType) => (
+        {rows.map((profesor: Profesor) => (
           <TableRow key={profesor.id} className="h-0">
             {columns.map((column) => (
               <TableCell key={column.key} className="text-center">
-                {column.key === 'see' ? (
+                {column.key === 'actions' ? (
                   <div className="flex items-center justify-center">
-                    <Link href={'/dashboard'}>
+                    <Link href={'/dashboard/profesor'}>
                       <Button
                         className="border-foreground hover:border-1 hover:text-foreground"
                         variant="light"
@@ -121,15 +116,14 @@ const ProfesorsTable = ({
                         <UserIcon className="h-6 w-6" />
                       </Button>
                     </Link>
-                  </div>
-                ) : column.key === 'delete' ? (
-                  <div className="flex items-center justify-center">
-                    <DeleteProfesorButton
-                      profesor={profesor}
-                      searchParams={searchParams}
-                      setPending={setPending}
-                      isDisabled={pending}
-                    />
+                    <div className="flex items-center justify-center">
+                      <DeleteProfesorButton
+                        profesor={profesor}
+                        searchParams={searchParams}
+                        setPending={setPending}
+                        isDisabled={pending}
+                      />
+                    </div>
                   </div>
                 ) : (
                   getKeyValue(profesor, column.key)

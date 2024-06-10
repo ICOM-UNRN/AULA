@@ -12,7 +12,7 @@ import {
   useTotalProfesorsPages,
 } from '@/hooks/swr-hooks';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { ProfesorType } from '@/app/lib/definitions';
+import { Profesor } from '@/app/lib/definitions';
 
 export const DeleteProfesorButton = ({
   profesor,
@@ -20,7 +20,7 @@ export const DeleteProfesorButton = ({
   isDisabled,
   setPending,
 }: {
-  profesor: ProfesorType;
+  profesor: Profesor;
   searchParams?: {
     query?: string;
     page?: string;
@@ -67,7 +67,7 @@ export const DeleteProfesorButton = ({
                   }
                   if (profesors.length === 1 && currentPage > 1) {
                     const newPage = currentPage - 1;
-                    const newPath = `/dashboard?page=${newPage}${query ? `&query=${query}` : ''}`;
+                    const newPath = `/dashboard/profesor?page=${newPage}${query ? `&query=${query}` : ''}`;
                     router.push(newPath);
                   }
                   mutateProfesors();

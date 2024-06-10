@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import Table from '@/app/components/dashboard/table';
+import ProfesorsTable from '@/app/components/dashboard/profesor/table';
 
 export const metadata: Metadata = {
   title: 'Profesor',
@@ -13,5 +13,5 @@ export default function Profesor({
     page?: string;
   };
 }) {
-  return <Table searchParams={searchParams} />;
+  return <ProfesorsTable searchParams={searchParams} />;
 }

@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 'use server';
 
 import { AuthError } from 'next-auth';
@@ -16,10 +17,10 @@ export async function authenticate(
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
-      case 'CredentialsSignin':
-        return 'Credenciales invalidas';
-      default:
-        return 'Algo salió mal :(';
+        case 'CredentialsSignin':
+          return 'Credenciales invalidas';
+        default:
+          return 'Algo salió mal :(';
       }
     }
     throw error;
@@ -314,27 +315,27 @@ const EventoFormSchema = z.object({
   comienzo: z.string().min(1, 'La fecha de comienzo es requerida'),
   fin: z.string().min(1, 'La fecha de fin es requerida')
 });
-  
+
 // Crear un evento
 const CreateEvento = EventoFormSchema.omit({ id: true });
-  
+
 export async function createEvento(formData: FormData): Promise<string> {
   const validatedFields = CreateEvento.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al crear evento.',
     });
   }
-  
+
   const { nombre, descripcion, comienzo, fin } = validatedFields.data;
-  
+
   try {
     const result = await sql`
         SELECT public.insert_evento(${nombre}, ${descripcion}, ${comienzo}, ${fin}) as result;
       `;
-  
+
     if (result.rows[0].result === 1) {
       return Promise.reject({ message: 'El evento ya existe.' });
     } else {
@@ -346,20 +347,20 @@ export async function createEvento(formData: FormData): Promise<string> {
     return Promise.reject({ message: 'Error en la base de datos: No se pudo crear el evento.' });
   }
 }
-  
+
 // Actualizar un evento
 export async function updateEvento(id: string, formData: FormData): Promise<string> {
   const validatedFields = EventoFormSchema.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al actualizar evento.',
     });
   }
-  
+
   const { nombre, descripcion, comienzo, fin } = validatedFields.data;
-  
+
   try {
     await sql`
         UPDATE evento
@@ -373,7 +374,7 @@ export async function updateEvento(id: string, formData: FormData): Promise<stri
     return Promise.reject({ message: 'Error en la base de datos: No se pudo actualizar el evento.' });
   }
 }
-  
+
 // Eliminar un evento
 export async function deleteEvento(id: string): Promise<string> {
   try {
@@ -395,22 +396,22 @@ const ProfesorPorMateriaFormSchema = z.object({
   alumnos_esperados: z.number().int().positive('La cantidad de alumnos esperados debe ser un número entero positivo'),
   tipo_clase: z.string().min(1, 'El tipo de clase es requerido')
 });
-  
+
 // Crear un profesor por materia
 const CreateProfesorPorMateria = ProfesorPorMateriaFormSchema;
-  
+
 export async function createProfesorPorMateria(formData: FormData): Promise<string> {
   const validatedFields = CreateProfesorPorMateria.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al asignar profesor a la materia.',
     });
   }
-  
+
   const { id_materia, id_profesor, alumnos_esperados, tipo_clase } = validatedFields.data;
-  
+
   try {
     const result = await sql`
         SELECT public.insert_profesor_por_materia(
@@ -420,7 +421,7 @@ export async function createProfesorPorMateria(formData: FormData): Promise<stri
           ${tipo_clase}
         ) as result;
       `;
-  
+
     if (result.rows[0].result === 1) {
       return Promise.reject({ message: 'El profesor ya está asignado a esa materia con ese tipo de clase.' });
     } else if (result.rows[0].result === 2) {
@@ -434,20 +435,20 @@ export async function createProfesorPorMateria(formData: FormData): Promise<stri
     return Promise.reject({ message: 'Error en la base de datos: No se pudo asignar el profesor a la materia.' });
   }
 }
-  
+
 // Actualizar un profesor por materia
 export async function updateProfesorPorMateria(id_materia: number, id_profesor: number, formData: FormData): Promise<string> {
   const validatedFields = ProfesorPorMateriaFormSchema.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al actualizar la asignación del profesor a la materia.',
     });
   }
-  
+
   const { alumnos_esperados, tipo_clase } = validatedFields.data;
-  
+
   try {
     await sql`
         UPDATE profesor_por_materia
@@ -461,7 +462,7 @@ export async function updateProfesorPorMateria(id_materia: number, id_profesor: 
     return Promise.reject({ message: 'Error en la base de datos: No se pudo actualizar la asignación del profesor a la materia.' });
   }
 }
-  
+
 // Eliminar un profesor por materia
 export async function deleteProfesorPorMateria(id_materia: number, id_profesor: number): Promise<string> {
   try {
@@ -479,7 +480,7 @@ export async function deleteProfesorPorMateria(id_materia: number, id_profesor: 
 // Esquema de validación para la creación de un profesor
 const ProfesorFormSchema = z.object({
   id: z.string().optional(),
-  documento: z.number().int().positive('El documento debe ser un número entero positivo'),
+  documento: z.coerce.number().int().positive('El documento debe ser un número entero positivo'),
   nombre: z.string().min(1, 'El nombre es requerido'),
   apellido: z.string().min(1, 'El apellido es requerido'),
   condicion: z.string().min(1, 'La condición es requerida'),
@@ -487,22 +488,22 @@ const ProfesorFormSchema = z.object({
   dedicacion: z.string().min(1, 'La dedicación es requerida'),
   periodo_a_cargo: z.string().min(1, 'El periodo a cargo es requerido')
 });
-  
+
 // Crear un profesor
 const CreateProfesor = ProfesorFormSchema.omit({ id: true });
-  
+
 export async function createProfesor(formData: FormData): Promise<string> {
   const validatedFields = CreateProfesor.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al crear profesor.',
     });
   }
-  
+
   const { documento, nombre, apellido, condicion, categoria, dedicacion, periodo_a_cargo } = validatedFields.data;
-  
+
   try {
     const result = await sql`
         SELECT public.insert_profesor(
@@ -515,32 +516,32 @@ export async function createProfesor(formData: FormData): Promise<string> {
           ${periodo_a_cargo}
         ) as result;
       `;
-  
+
     if (result.rows[0].result === 1) {
       return Promise.reject({ message: 'El profesor ya existe.' });
     } else {
-      revalidatePath('/dashboard/profesores');
+      revalidatePath('/dashboard/profesor');
       return 'Profesor creado con éxito';
     }
   } catch (error) {
-    revalidatePath('/dashboard/profesores');
+    revalidatePath('/dashboard/profesor');
     return Promise.reject({ message: 'Error en la base de datos: No se pudo crear el profesor.' });
   }
 }
-  
+
 // Actualizar un profesor
 export async function updateProfesor(id: string, formData: FormData): Promise<string> {
   const validatedFields = ProfesorFormSchema.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al actualizar profesor.',
     });
   }
-  
+
   const { documento, nombre, apellido, condicion, categoria, dedicacion, periodo_a_cargo } = validatedFields.data;
-  
+
   try {
     await sql`
         UPDATE profesor
@@ -556,7 +557,7 @@ export async function updateProfesor(id: string, formData: FormData): Promise<st
     return Promise.reject({ message: 'Error en la base de datos: No se pudo actualizar el profesor.' });
   }
 }
-  
+
 // Eliminar un profesor
 export async function deleteProfesor(id: string): Promise<string> {
   try {
@@ -577,22 +578,22 @@ const RecursoPorAulaFormSchema = z.object({
   id_recurso: z.number().int().positive('El ID del recurso debe ser un número entero positivo'),
   cantidad: z.number().int().positive('La cantidad debe ser un número entero positivo')
 });
-  
+
 // Crear un recurso por aula
 const CreateRecursoPorAula = RecursoPorAulaFormSchema;
-  
+
 export async function createRecursoPorAula(formData: FormData): Promise<string> {
   const validatedFields = CreateRecursoPorAula.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al asignar recurso al aula.',
     });
   }
-  
+
   const { id_aula, id_recurso, cantidad } = validatedFields.data;
-  
+
   try {
     const result = await sql`
         SELECT public.insert_recurso_por_aula(
@@ -601,7 +602,7 @@ export async function createRecursoPorAula(formData: FormData): Promise<string> 
           ${cantidad}
         ) as result;
       `;
-  
+
     if (result.rows[0].result === 1) {
       return Promise.reject({ message: 'El recurso ya está asignado a esa aula.' });
     } else if (result.rows[0].result === 2) {
@@ -615,20 +616,20 @@ export async function createRecursoPorAula(formData: FormData): Promise<string> 
     return Promise.reject({ message: 'Error en la base de datos: No se pudo asignar el recurso al aula.' });
   }
 }
-  
+
 // Actualizar un recurso por aula
 export async function updateRecursoPorAula(id_aula: number, id_recurso: number, formData: FormData): Promise<string> {
   const validatedFields = RecursoPorAulaFormSchema.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al actualizar el recurso por aula.',
     });
   }
-  
+
   const { cantidad } = validatedFields.data;
-  
+
   try {
     await sql`
         UPDATE recurso_por_aula
@@ -642,7 +643,7 @@ export async function updateRecursoPorAula(id_aula: number, id_recurso: number, 
     return Promise.reject({ message: 'Error en la base de datos: No se pudo actualizar el recurso por aula.' });
   }
 }
-  
+
 // Eliminar un recurso por aula
 export async function deleteRecursoPorAula(id_aula: number, id_recurso: number): Promise<string> {
   try {
@@ -663,22 +664,22 @@ const RecursoFormSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido'),
   descripcion: z.string().min(1, 'La descripción es requerida')
 });
-  
+
 // Crear un recurso
 const CreateRecurso = RecursoFormSchema.omit({ id_recurso: true });
-  
+
 export async function createRecurso(formData: FormData): Promise<string> {
   const validatedFields = CreateRecurso.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al crear recurso.',
     });
   }
-  
+
   const { nombre, descripcion } = validatedFields.data;
-  
+
   try {
     const result = await sql`
         SELECT public.insert_recurso(
@@ -686,7 +687,7 @@ export async function createRecurso(formData: FormData): Promise<string> {
           ${descripcion}
         ) as result;
       `;
-  
+
     if (result.rows[0].result === 1) {
       return Promise.reject({ message: 'El recurso ya existe.' });
     } else {
@@ -698,20 +699,20 @@ export async function createRecurso(formData: FormData): Promise<string> {
     return Promise.reject({ message: 'Error en la base de datos: No se pudo crear el recurso.' });
   }
 }
-  
+
 // Actualizar un recurso
 export async function updateRecurso(id_recurso: string, formData: FormData): Promise<string> {
   const validatedFields = RecursoFormSchema.safeParse(Object.fromEntries(formData.entries()));
-  
+
   if (!validatedFields.success) {
     return Promise.reject({
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan datos. Error al actualizar recurso.',
     });
   }
-  
+
   const { nombre, descripcion } = validatedFields.data;
-  
+
   try {
     await sql`
         UPDATE recurso
@@ -725,7 +726,7 @@ export async function updateRecurso(id_recurso: string, formData: FormData): Pro
     return Promise.reject({ message: 'Error en la base de datos: No se pudo actualizar el recurso.' });
   }
 }
-  
+
 // Eliminar un recurso
 export async function deleteRecurso(id_recurso: string): Promise<string> {
   try {
