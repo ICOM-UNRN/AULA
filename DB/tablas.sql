@@ -39,7 +39,9 @@ CREATE TABLE profesor_por_materia(
     ON DELETE SET NULL,
   alumnos_esperados INTEGER,
   tipo_clase Tnombre,
-  PRIMARY KEY (id_materia, id_profesor, alumnos_esperados, tipo_clase)
+  activo BOOLEAN DEFAULT TRUE,
+  PRIMARY KEY (id_materia, alumnos_esperados, tipo_clase),
+  UNIQUE (id_materia, id_profesor, alumnos_esperados, tipo_clase)
 );
 
 -- Definición de la tabla Edificio
