@@ -99,3 +99,104 @@ export function useTotalProfesorsPages(query?: string) {
     };
   }
 }
+
+// AULAS
+
+export function useAulasById(id: string) {
+  const { data, error, isLoading, mutate } = useSWR(
+    `/api/aula?id=${id}`,
+    fetcher,
+  );
+
+  return {
+    aula: data,
+    isLoading,
+    isError: error,
+    mutateAula: mutate,
+  };
+}
+
+export function useAulas(query?: string, page?: number) {
+  if (!page && !query) {
+    const { data, error, isLoading, mutate } = useSWR('/api/aula', fetcher);
+    return {
+      aulas: data,
+      isLoading,
+      isError: error,
+      mutateAulas: mutate,
+    };
+  } else if (page && !query) {
+    const { data, error, isLoading, mutate } = useSWR(
+      `/api/aula?page=${page}`,
+      fetcher,
+    );
+    return {
+      aulas: data,
+      isLoading,
+      isError: error,
+      mutateAulas: mutate,
+    };
+  } else if (query && !page) {
+    const { data, error, isLoading, mutate } = useSWR(
+      `/api/aula?query=${query}`,
+      fetcher,
+    );
+    return {
+      aulas: data,
+      isLoading,
+      isError: error,
+      mutateAulas: mutate,
+    };
+  } else {
+    const { data, error, isLoading, mutate } = useSWR(
+      `/api/aula?page=${page}&query=${query}`,
+      fetcher,
+    );
+    return {
+      aulas: data,
+      isLoading,
+      isError: error,
+      mutateAulas: mutate,
+    };
+  }
+}
+
+export function useTotalAulas() {
+  const { data, error, isLoading, mutate } = useSWR(
+    '/api/count/aula',
+    fetcher,
+  );
+
+  return {
+    totalAulas: data,
+    isLoading,
+    isError: error,
+    mutateTotalAulas: mutate,
+  };
+}
+
+export function useTotalAulasPages(query?: string) {
+  if (!query) {
+    const { data, error, isLoading, mutate } = useSWR(
+      '/api/count/aula/pages',
+      fetcher,
+    );
+    return {
+      totalAulasPages: data,
+      isLoading,
+      isError: error,
+      mutateTotalAulasPages: mutate,
+    };
+  } else {
+    const { data, error, isLoading, mutate } = useSWR(
+      `/api/count/aula/pages?query=${query}`,
+      fetcher,
+    );
+    return {
+      totalAulasPages: data,
+      isLoading,
+      isError: error,
+      mutateTotalAulasPages: mutate,
+    };
+  }
+}
