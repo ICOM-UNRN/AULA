@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   try {
     if (id) {
       const profesorPorMateria = await sql`
-        SELECT * FROM profesor_por_materia WHERE id_materia=${id} OR id_profesor=${id}
+        SELECT * FROM profesor_por_materia WHERE (id_materia=${id} OR id_profesor=${id}) AND activo = TRUE
       `;
       return NextResponse.json(profesorPorMateria.rows, { status: 200 });
     } else if (!query && currentPage) {
@@ -27,6 +27,7 @@ export async function GET(request: Request) {
             alumnos_esperados,
             tipo_clase
           FROM profesor_por_materia
+          WHERE activo = TRUE
         ) AS subquery
         ORDER BY id_materia DESC
         LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
@@ -42,6 +43,7 @@ export async function GET(request: Request) {
             alumnos_esperados,
             tipo_clase
           FROM profesor_por_materia
+          WHERE activo = TRUE
         ) AS subquery
         WHERE
           id_materia::text ILIKE ${`%${query}%`} OR
@@ -62,6 +64,7 @@ export async function GET(request: Request) {
             alumnos_esperados,
             tipo_clase
           FROM profesor_por_materia
+          WHERE activo = TRUE
         ) AS subquery
         WHERE
           id_materia::text ILIKE ${`%${query}%`} OR
@@ -79,6 +82,7 @@ export async function GET(request: Request) {
           alumnos_esperados,
           tipo_clase
         FROM profesor_por_materia
+        WHERE activo = TRUE
         ORDER BY id_materia DESC
       `;
       return NextResponse.json(profesoresPorMateria.rows, { status: 200 });
