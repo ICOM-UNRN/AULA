@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import AddAula from '@/app/components/dashboard/aula/add-form';
 import { Button } from '@nextui-org/react';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
@@ -19,7 +20,7 @@ export default function CreateAula() {
           Regresar
         </Button>
       </Link>
-      <h1>Campos aula</h1>
+      <AddAula />
     </>
   );
 }

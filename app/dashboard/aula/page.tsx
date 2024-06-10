@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import AulasTable from '@/app/components/dashboard/aula/table';
 
 export const metadata: Metadata = {
   title: 'Aula',
@@ -12,12 +13,5 @@ export default function Aula({
     page?: string;
   };
 }) {
-  const { query, page } = searchParams || {};
-  return (
-    <>
-      <h1>Tabla aula</h1>
-      <p>Query: {query}</p>
-      <p>Página: {page}</p>
-    </>
-  );
+  return <AulasTable searchParams={searchParams}/>
 }
