@@ -13,5 +13,5 @@ export default function Aula({
     page?: string;
   };
 }) {
-  return <AulasTable searchParams={searchParams}/>
+  return <AulasTable searchParams={searchParams}/>;
 }
