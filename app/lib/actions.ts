@@ -462,17 +462,19 @@ export async function updateProfesorPorMateria(id_materia: number, id_profesor: 
   }
 }
   
-// Eliminar un profesor por materia
+// Eliminar un profesor por materia (Borrado lógico)
 export async function deleteProfesorPorMateria(id_materia: number, id_profesor: number): Promise<string> {
   try {
     await sql`
-        DELETE FROM profesor_por_materia WHERE id_materia = ${id_materia} AND id_profesor = ${id_profesor}
-      `;
+      UPDATE profesor_por_materia
+      SET activo = FALSE
+      WHERE id_materia = ${id_materia} AND id_profesor = ${id_profesor}
+    `;
     revalidatePath('/dashboard/profesores_por_materia');
-    return 'Asignación de profesor a materia eliminada con éxito';
+    return 'Asignación de profesor a materia desactivada con éxito';
   } catch (error) {
     revalidatePath('/dashboard/profesores_por_materia');
-    return Promise.reject({ message: 'Error en la base de datos: No se pudo eliminar la asignación del profesor a la materia.' });
+    return Promise.reject({ message: 'Error en la base de datos: No se pudo desactivar la asignación del profesor a la materia.' });
   }
 }
 
