@@ -5,6 +5,7 @@ import './globals.css';
 import localFont from 'next/font/local';
 import Header from './components/header';
 import Footer from './components/footer';
+import { Toaster } from 'sonner';
 
 const fabrikat = localFont({
   src: [
@@ -114,6 +115,24 @@ export default function RootLayout({
   return (
     <html lang="es">
       <ThemeProvider>
+        <Toaster
+          closeButton
+          toastOptions={{
+            classNames: {
+              toast: 'bg-lightPaper dark:bg-darkPaper',
+              title: 'text-foreground dark:text-[#FCF6F5]',
+              description: 'text-foreground dark:text-[#FCF6F5]',
+              error: 'text-danger 1px solid border-danger',
+              success: 'text-success 1px solid border-success ',
+              actionButton:
+                'bg-lightPaper dark:bg-darkPaper text-foreground dark:text-[#FCF6F5] border-darkPaper dark:border-lightPaper',
+              cancelButton:
+                'bg-lightPaper dark:bg-darkPaper text-foreground dark:text-[#FCF6F5] border-darkPaper dark:border-lightPaper',
+              closeButton:
+                'bg-lightPaper dark:bg-darkPaper text-foreground dark:text-[#FCF6F5] border-darkPaper dark:border-lightPaper',
+            },
+          }}
+        />
         <NextUIProviderContext>
           <body
             className={`${fabrikat.variable} font-fabrikat antialiased`}

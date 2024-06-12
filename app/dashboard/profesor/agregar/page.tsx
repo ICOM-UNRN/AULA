@@ -13,13 +13,14 @@ export default function CreateProfesor() {
     <>
       <Link href="/dashboard/profesor" passHref>
         <Button
-          startContent={<ArrowLeftIcon className=" h-3 w-3" />}
+          startContent={<ArrowLeftIcon className=" h-4 w-4" />}
           variant="light"
-          className="mb-5"
+          className="mb-5 underline "
         >
           Regresar
         </Button>
       </Link>
+      <h1 className="text-xl font-bold">Agregar profesor</h1>
       <AddProfesor />
     </>
   );

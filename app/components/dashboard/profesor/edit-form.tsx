@@ -1,28 +1,18 @@
 'use client';
+import { Button, Spinner } from '@nextui-org/react';
 import { Input } from '@/app/components/form/input';
-import { useState } from 'react';
-import { createProfesor } from '@/app/lib/actions';
+import { useEffect, useState } from 'react';
+import { updateProfesor } from '@/app/lib/actions';
 import { toast } from 'sonner';
-import {
-  useProfesors,
-  useTotalProfesorsPages,
-  useTotalProfesors,
-} from '@/hooks/swr-hooks';
-import { Button } from '@nextui-org/react';
-type CreateUserFormProps = {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
-};
-const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
-  const query = searchParams?.query;
-  const currentPage = Number(searchParams?.page) || 1;
-  const { mutateProfesors } = useProfesors(query, currentPage);
-  const { totalProfesorsPages, mutateTotalProfesorsPages } =
-    useTotalProfesorsPages();
-  const { totalProfesors, mutateTotalProfesors } = useTotalProfesors();
+import { useProfesorById } from '@/hooks/swr-hooks';
+import { usePathname } from 'next/navigation';
+
+export const EditProfesor = () => {
+  const pathname = usePathname();
+  const id = pathname.split('/').pop() ?? '';
+  const { profesor, isLoading, mutateProfesor } = useProfesorById(id);
   const [loading, setLoading] = useState(false);
+  const [onEdit, setOnEdit] = useState(false);
 
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -40,6 +30,34 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
   const [dedicationError, setDedicationError] = useState(false);
   const [conditionError, setConditionError] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
+
+  const [changes, setChanges] = useState(false);
+
+  useEffect(() => {
+    setName(profesor?.nombre);
+    setLastName(profesor?.apellido);
+    setDni(profesor?.documento);
+    setPeriod(profesor?.periodo_a_cargo);
+    setDedication(profesor?.dedicacion);
+    setCondition(profesor?.condicion);
+    setCategory(profesor?.categoria);
+  }, [profesor]);
+
+  useEffect(() => {
+    if (
+      name != profesor?.nombre ||
+      lastName != profesor?.apellido ||
+      dni != profesor?.documento?.toString() ||
+      period != profesor?.periodo_a_cargo ||
+      dedication != profesor?.dedicacion ||
+      condition != profesor?.condicion ||
+      category != profesor?.categoria
+    ) {
+      setChanges(true);
+    } else {
+      setChanges(false);
+    }
+  }, [name, lastName, dni, period, dedication, condition, category, profesor]);
 
   const validateName = (name: string) => {
     const re = /^[A-Za-z\s]+$/;
@@ -97,67 +115,41 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
       setDedicationError(true);
     }
   };
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     const formData = new FormData(event.currentTarget);
     toast.promise(
-      createProfesor(formData)
+      updateProfesor(profesor.id, formData)
         .then(() => {
-          if (
-            query?.includes(name) ||
-            query?.includes(lastName) ||
-            query?.includes(dni) ||
-            query?.includes(period) ||
-            query?.includes(dedication) ||
-            query?.includes(condition) ||
-            query?.includes(category) ||
-            !query
-          ) {
-            mutateProfesors();
-          }
-          mutateTotalProfesors(totalProfesors + 1, false);
-          if (
-            ((query?.includes(name) ||
-              query?.includes(lastName) ||
-              query?.includes(dni) ||
-              query?.includes(period) ||
-              query?.includes(dedication) ||
-              query?.includes(condition) ||
-              query?.includes(category)) &&
-              totalProfesors % 6 === 0) ||
-            (query == undefined && totalProfesors % 6 === 0)
-          ) {
-            mutateTotalProfesorsPages(totalProfesorsPages + 1, false);
-          }
+          mutateProfesor();
           setLoading(false);
           setTrySubmit(false);
-          setName('');
-          setLastName('');
-          setDni('');
-          setPeriod('');
-          setDedication('');
-          setCondition('');
-          setCategory('');
+          setOnEdit(false);
         })
-        .catch((error: string) => {
+        .catch((error) => {
           console.error(error);
           setLoading(false);
+          setTrySubmit(false);
+          setOnEdit(false);
         }),
       {
-        loading: 'Creando...',
-        success: 'Profesor creado con éxito',
-        error: 'Error al crear el profesor',
+        loading: 'Editando...',
+        success: 'Profesor editado con exito',
+        error: 'Error',
       },
     );
   };
 
+  if (isLoading)
+    return (
+      <div className="flex w-full justify-center p-5">
+        <Spinner color="primary" />
+      </div>
+    );
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="relative  w-full bg-lightPaper p-5 dark:bg-darkPaper"
-    >
+    <form onSubmit={handleSubmit} className="relative p-5">
       <div className=" flex flex-col items-center justify-evenly gap-5">
         <div className="flex w-full flex-row justify-between gap-2">
           <Input
@@ -166,7 +158,7 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             type="text"
             variant="bordered"
             labelPlacement="outside"
-            value={name}
+            value={!onEdit ? profesor.nombre : name}
             onValueChange={(e: string) => {
               setName(e);
               if (trySubmit) {
@@ -175,7 +167,8 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             }}
             placeholder="Ingresar nombre"
             errorMessage="Ingresa un nombre valido"
-            isRequired
+            isReadOnly={!onEdit}
+            isRequired={onEdit}
             isInvalid={trySubmit && nameError}
             classNames={{
               inputWrapper: 'p-0',
@@ -189,7 +182,7 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             type="text"
             variant="bordered"
             labelPlacement="outside"
-            value={lastName}
+            value={!onEdit ? profesor.apellido : lastName}
             onValueChange={(e) => {
               setLastName(e);
               if (trySubmit) {
@@ -198,7 +191,8 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             }}
             placeholder="Ingresar apellido"
             errorMessage="Ingrese un apellido valido"
-            isRequired
+            isReadOnly={!onEdit}
+            isRequired={onEdit}
             isInvalid={trySubmit && lastNameError}
             classNames={{
               inputWrapper: 'p-0',
@@ -212,7 +206,7 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             type="number"
             variant="bordered"
             labelPlacement="outside"
-            value={dni}
+            value={!onEdit ? profesor.documento : dni}
             onValueChange={(e) => {
               setDni(e);
               if (trySubmit) {
@@ -221,7 +215,8 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             }}
             placeholder="Ingresar DNI"
             errorMessage="Ingrese un DNI valido"
-            isRequired
+            isReadOnly={!onEdit}
+            isRequired={onEdit}
             isInvalid={trySubmit && dniError}
             classNames={{
               inputWrapper: 'p-0',
@@ -235,7 +230,7 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             type="string"
             variant="bordered"
             labelPlacement="outside"
-            value={period}
+            value={!onEdit ? profesor.periodo_a_cargo : period}
             onValueChange={(e: string) => {
               setPeriod(e);
               if (trySubmit) {
@@ -244,7 +239,8 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             }}
             placeholder="Ingresar periodo"
             errorMessage="Ingresa un periodo valido"
-            isRequired
+            isReadOnly={!onEdit}
+            isRequired={onEdit}
             isInvalid={trySubmit && periodError}
             classNames={{
               inputWrapper: 'p-0 px-2',
@@ -260,7 +256,7 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             type="string"
             variant="bordered"
             labelPlacement="outside"
-            value={condition}
+            value={!onEdit ? profesor.condicion : condition}
             onValueChange={(e: string) => {
               setCondition(e);
               if (trySubmit) {
@@ -269,7 +265,8 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             }}
             placeholder="Ingresar condicion"
             errorMessage="Ingresa una condición valida"
-            isRequired
+            isReadOnly={!onEdit}
+            isRequired={onEdit}
             isInvalid={trySubmit && conditionError}
             classNames={{
               inputWrapper: 'p-0 px-2',
@@ -283,7 +280,7 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             type="string"
             variant="bordered"
             labelPlacement="outside"
-            value={category}
+            value={!onEdit ? profesor.categoria : category}
             onValueChange={(e: string) => {
               setCategory(e);
               if (trySubmit) {
@@ -292,7 +289,8 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             }}
             placeholder="Ingresar categoria"
             errorMessage="Ingresa una categoria valida"
-            isRequired
+            isReadOnly={!onEdit}
+            isRequired={onEdit}
             isInvalid={trySubmit && categoryError}
             classNames={{
               inputWrapper: 'p-0 px-2',
@@ -306,7 +304,7 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             type="string"
             variant="bordered"
             labelPlacement="outside"
-            value={dedication}
+            value={!onEdit ? profesor.dedicacion : dedication}
             onValueChange={(e: string) => {
               setDedication(e);
               if (trySubmit) {
@@ -315,7 +313,8 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             }}
             placeholder="Ingresar dedicación"
             errorMessage="Ingresa una dedicación valida"
-            isRequired
+            isReadOnly={!onEdit}
+            isRequired={onEdit}
             isInvalid={trySubmit && dedicationError}
             classNames={{
               inputWrapper: 'p-0 px-2',
@@ -324,66 +323,91 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
             }}
           />
         </div>
-        <div className="ml-2 flex flex-col gap-1 md:flex-row">
+        {onEdit ? (
+          <>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                color="success"
+                variant="bordered"
+                type="submit"
+                isLoading={loading}
+                isDisabled={!changes}
+                onClick={() => {
+                  setTrySubmit(true);
+                  validateName(name);
+                  validateLastName(lastName);
+                  validateDni(dni);
+                  validatePeriod(period);
+                  validateCondition(condition);
+                  validateCategory(category);
+                }}
+                endContent={
+                  !loading && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-6 w-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m4.5 12.75 6 6 9-13.5"
+                      />
+                    </svg>
+                  )
+                }
+              >
+                Guardar
+              </Button>
+              <Button
+                size="sm"
+                color="danger"
+                variant="bordered"
+                onClick={() => {
+                  setOnEdit(false);
+                  setTrySubmit(false);
+                  setNameError(false);
+                  setLastNameError(false);
+                  setDniError(false);
+                  setPeriodError(false);
+                  setDedicationError(false);
+                  setConditionError(false);
+                  setCategoryError(false);
+                }}
+                endContent={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18 18 6M6 6l12 12"
+                    />
+                  </svg>
+                }
+              >
+                Cancelar
+              </Button>
+            </div>
+            <p className="absolute bottom-0 text-xs text-danger">
+              {!changes && <>No hay cambios</>}
+            </p>
+          </>
+        ) : (
           <Button
             size="sm"
-            color="success"
-            variant="bordered"
-            type="submit"
-            isLoading={loading}
-            onClick={() => {
-              setTrySubmit(true);
-              validateName(name);
-              validateLastName(lastName);
-              validateDni(dni);
-              validatePeriod(period);
-              validateCondition(condition);
-              validateCategory(category);
-              validateDedication(dedication);
-            }}
-            isDisabled={loading}
-            endContent={
-              !loading && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-6 w-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m4.5 12.75 6 6 9-13.5"
-                  />
-                </svg>
-              )
-            }
-          >
-            Agregar
-          </Button>
-          <Button
-            size="sm"
-            color="danger"
-            variant="bordered"
-            onClick={() => {
-              setTrySubmit(false);
-              setNameError(false);
-              setLastNameError(false);
-              setDniError(false);
-              setPeriodError(false);
-              setDedicationError(false);
-              setConditionError(false);
-              setCategoryError(false);
-              setName('');
-              setLastName('');
-              setDni('');
-              setPeriod('');
-              setDedication('');
-              setCondition('');
-              setCategory('');
-            }}
+            color="primary"
+            className="text-white hover:bg-primary-600"
+            onClick={() => setOnEdit(true)}
             endContent={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -391,22 +415,20 @@ const AddProfesor = ({ searchParams }: CreateUserFormProps) => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="h-6 w-6"
+                className="h-5 w-5"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M6 18 18 6M6 6l12 12"
+                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
                 />
               </svg>
             }
           >
-            Limpiar
+            Editar
           </Button>
-        </div>
+        )}
       </div>
     </form>
   );
 };
-
-export default AddProfesor;

@@ -1,6 +1,5 @@
 /* eslint-disable indent */
 'use client';
-import { Toaster } from 'sonner';
 import { Button } from '@nextui-org/react';
 import clsx from 'clsx';
 import { Suspense, useEffect } from 'react';
@@ -25,24 +24,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, []);
   return (
     <main className="flex w-full flex-col items-center justify-center">
-      <Toaster
-        closeButton
-        toastOptions={{
-          classNames: {
-            toast: 'bg-lightPaper dark:bg-darkPaper',
-            title: 'text-foreground dark:text-[#FCF6F5]',
-            description: 'text-foreground dark:text-[#FCF6F5]',
-            error: 'text-danger 1px solid border-danger',
-            success: 'text-success 1px solid border-success ',
-            actionButton:
-              'bg-lightPaper dark:bg-darkPaper text-foreground dark:text-[#FCF6F5] border-darkPaper dark:border-lightPaper',
-            cancelButton:
-              'bg-lightPaper dark:bg-darkPaper text-foreground dark:text-[#FCF6F5] border-darkPaper dark:border-lightPaper',
-            closeButton:
-              'bg-lightPaper dark:bg-darkPaper text-foreground dark:text-[#FCF6F5] border-darkPaper dark:border-lightPaper',
-          },
-        }}
-      />
       <div className="flex w-[80%] flex-col gap-3 rounded-lg bg-lightPaper p-6 shadow-medium dark:bg-darkPaper">
         <div className="flex">
           {(pathname === `/dashboard/${section}` ||

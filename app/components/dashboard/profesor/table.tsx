@@ -17,7 +17,7 @@ import { UserIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Profesor } from '@/app/lib/definitions';
 import { DeleteProfesorButton } from './delete-button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const ProfesorsTable = ({
   searchParams,
@@ -30,7 +30,10 @@ const ProfesorsTable = ({
   const query = searchParams?.query;
   const currentPage = Number(searchParams?.page) || 1;
   const [pending, setPending] = useState(false);
-  const { profesors, isLoading } = useProfesors(query, currentPage);
+  const { profesors, isLoading, mutateProfesors } = useProfesors(
+    query,
+    currentPage,
+  );
   const { totalProfesorsPages } = useTotalProfesorsPages(query);
   const { replace } = useRouter();
   const pathname = usePathname();
@@ -49,6 +52,10 @@ const ProfesorsTable = ({
       label: 'Acciones',
     },
   ];
+
+  useEffect(() => {
+    mutateProfesors();
+  }, [pending]);
 
   return (
     <Table
@@ -106,7 +113,7 @@ const ProfesorsTable = ({
               <TableCell key={column.key} className="text-center">
                 {column.key === 'actions' ? (
                   <div className="flex items-center justify-center">
-                    <Link href={'/dashboard/profesor'}>
+                    <Link href={`/dashboard/profesor/${profesor.id}`}>
                       <Button
                         className="border-foreground hover:border-1 hover:text-foreground"
                         variant="light"
