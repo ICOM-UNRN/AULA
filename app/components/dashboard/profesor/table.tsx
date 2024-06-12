@@ -41,7 +41,6 @@ const ProfesorsTable = ({
   const columns = [
     { key: 'nombre', label: 'Nombre' },
     { key: 'apellido', label: 'Apellido' },
-    { key: 'periodo_a_cargo', label: 'A cargo' },
     { key: 'documento', label: 'DNI' },
     { key: 'condicion', label: 'Condicion' },
     { key: 'categoria', label: 'Categoria' },

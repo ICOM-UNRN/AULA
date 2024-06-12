@@ -37,7 +37,7 @@ export default function LoginForm() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname === '/dashboard') router.push('/login');
+    if (pathname.includes('/dashboard')) router.push('/login');
   }, []);
 
   return (

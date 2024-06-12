@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 
 const links = [
-  { href: '/UNRN', label: 'UNRN' },
+  { href: 'https://www.unrn.edu.ar/home', label: 'UNRN' },
   { href: 'https://guarani.unrn.edu.ar/', label: 'SIU Guaraní' },
   { href: '/contacto', label: 'Contacto' },
   { href: '/login', label: 'Acceder' },
