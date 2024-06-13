@@ -1,4 +1,4 @@
-import { Button } from '@nextui-org/react';
+import ImportFile from '@/app/components/dashboard/importar-exportar/import-file';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -8,12 +8,7 @@ export const metadata: Metadata = {
 export default function Materia() {
   return (
     <div className=" flex flex-row justify-center gap-3">
-      <Button size="lg" color="primary" className="w-60">
-        Importar
-      </Button>
-      <Button size="lg" color="primary" className="w-60">
-        Exportar
-      </Button>
+      <ImportFile />
     </div>
   );
 }
