@@ -2,6 +2,7 @@
 
 import { Button } from '@nextui-org/react';
 import { useState } from 'react';
+import { importExcel } from '@/app/api/importar/excel/route';
 
 export default function ImportFile() {
   const [file, setFile] = useState<File>();
@@ -16,7 +17,9 @@ export default function ImportFile() {
     formData.append('file', file);
     try {
       alert(`Importando archivo "${file.name}"...`);
-      // const funcionConExcel(file)
+      // Llama a la funcion que importara los datos del excel. Luego retorna un array con los headers como llaves y las filas como datos.
+      const result = await importExcel(file);
+      console.log(result)
     } catch (error) {
       console.error(error);
     }
@@ -28,7 +31,7 @@ export default function ImportFile() {
     >
       <input
         type="file"
-        accept=".xls, .xlsx, .csv"
+        accept=".xls, .xlsx"
         onChange={(event) => {
           const file = event.target.files?.[0];
           if (file) {
