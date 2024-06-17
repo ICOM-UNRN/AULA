@@ -1,5 +1,6 @@
 import { read, utils } from 'xlsx';
 import { sql } from '@vercel/postgres';
+import { createProfesor } from '@/app/lib/actions';
 
 interface ExcelData {
     [key: string]: any;
@@ -8,39 +9,47 @@ interface ExcelData {
 export const importExcel = async (file: File): Promise<ExcelData> => {
   try {
     const data = await convertToJson(file);
-
     // Distribuir los datos a la base de datos
     if (data || Array.isArray(data)) {
       // Prueba con un solo profesor
-      const row1 = data[0]
-      console.log(row1)
-      console.log(row1.DNI_Docente)
-      console.log(row1.Nombre_Docente)
-      console.log(row1.Apellido_Docente)
-      console.log(row1.Condicion)
-      console.log(row1.Categoria)
-      console.log(row1.Dedicacion)
-      console.log(row1.Periodo_A_Cargo)
-      const result = await sql`
-        SELECT public.insert_profesor(
-          ${row1.DNI_Docente},
-          ${row1.Nombre_Docente},
-          ${row1.Apellido_Docente},
-          ${row1.Condicion},
-          ${row1.Categoria},
-          ${row1.Dedicacion},
-          ${row1.Periodo_A_Cargo},
-        ) as result;
-      `;
-      if (result.rows[0].result === 1) {
-        return Promise.reject({ message: 'El profesor ya existe.' });
-      } else if (result.rows[0].result === 2) {
-        return Promise.reject({ message: 'El profesor no existe.' });
-      } else {
-        return Promise.resolve({message: 'Profesores cargados con exito'});
+      for (const row of data) {
+        console.log(row)
+        // Cargar el profesor
+        const formData_profesor = new FormData();
+        formData_profesor.append('DNI_Docente', row.DNI_Docente);
+        formData_profesor.append('Nombre_Docente', row.Nombre_Docente);
+        formData_profesor.append('Apellido_Docente', row.Apellido_Docente);
+        formData_profesor.append('Condicion', row.Condicion);
+        formData_profesor.append('Categoria', row.Categoria);
+        formData_profesor.append('Dedicacion', row.Dedicacion);
+        formData_profesor.append('Periodo_A_Cargo', row.Periodo_A_Cargo);
+        const result_profesor = await createProfesor(formData_profesor);
+        console.log(result_profesor);
+        // const result_profesor = await sql`
+        //   SELECT public.insert_profesor(
+        //     ${row.DNI_Docente},
+        //     ${row.Nombre_Docente},
+        //     ${row.Apellido_Docente},
+        //     ${row.Condicion},
+        //     ${row.Categoria},
+        //     ${row.Dedicacion},
+        //     ${row.Periodo_A_Cargo}
+        //   ) as result_profesor;
+        // `;
+        //Cargar materia
+        // const result_materia = await sql`
+        //   SELECT public.insert_materia(
+        //     ${row.Codigo_Guarani},
+        //     ${row.Carrera},
+        //     ${row.Materia},
+        //     ${row.Ano},
+        //     ${row.Cuatrimestre},
+        //     ${row.Taxonomia},
+        //     ${row.Horas_Semanales},
+        //     ${row.Comisiones}
+        //   ) as result_materia;
+        // `;
       }
-      // for (const row of data) {
-      // }
     }
 
     return data;
