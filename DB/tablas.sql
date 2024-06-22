@@ -102,8 +102,9 @@ CREATE TABLE asignacion (
     ON UPDATE CASCADE
     ON DELETE CASCADE,
   dia Tnombre NOT NULL CHECK (dia IN ('Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo')),
-  horario_comienzo TIME NOT NULL,
-  horario_fin TIME NOT NULL
+  horario_comienzo INTEGER NOT NULL,
+  horario_fin INTEGER NOT NULL,
+  UNIQUE (id_aula, dia, horario_comienzo)
 );
 
 
