@@ -48,7 +48,7 @@ CREATE TABLE profesor_por_materia(
 CREATE TABLE edificio (
   id SERIAL PRIMARY KEY,
   nombre Tnombre,
-  direccion Tnombre,
+  calle Tnombre,
   altura INTEGER
 );
 

@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION public.insert_edificio(
 	p_nombre VARCHAR(50),
-	p_direccion VARCHAR(50),
+	p_calle VARCHAR(50),
 	p_altura integer)
     RETURNS integer
     LANGUAGE 'plpgsql'
@@ -12,7 +12,7 @@ DECLARE
 BEGIN
     SELECT * FROM edificio 
     WHERE nombre LIKE p_nombre 
-    and direccion LIKE p_direccion
+    and calle LIKE p_calle
     and altura = p_altura
     into existe_edificio;
     
@@ -20,8 +20,8 @@ BEGIN
         return 1; -- Ya existe el edificio
     end if;
     
-    insert into edificio (nombre, direccion, altura) 
-    values (p_nombre, p_direccion, p_altura);
+    insert into edificio (nombre, calle, altura) 
+    values (p_nombre, p_calle, p_altura);
     return 0;
 END;
 $BODY$;
