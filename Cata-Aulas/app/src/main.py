@@ -5,7 +5,7 @@ from categorias.Edificio import Edificio
 def main():
     try:
         # Ejecutar leerExcel.py usando subprocess
-        subprocess.run(["python", "app/src/leerExcel2.py"])
+        subprocess.run(["python", "app/src/leerExcel2.py"], check=True)
 
         # Crear el edificio
         edificio = Edificio("Anasagasti II")
@@ -23,7 +23,7 @@ def main():
         edificio.guardar_aulas_json("aulas.json")
 
         # Corre el programa de asignación de materias
-        subprocess.run(["python", "app/src/asignacion3.py"])
+        subprocess.run(["python", "app/src/asignacion4.py"], check=True)
 
     except Exception as e:
         print(f"Error: {e}")
